@@ -7,11 +7,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.testng.annotations.Test;
 
 @Slf4j
-public class ProductFilterTest extends TestBase {
+public class ParfumProductFilterTest extends TestBase {
 	LandingPage landingPage;
 	@Test
 	public void testProductFilter() {
-		executor = new Executor("TEST_NAME", executionSpecifications);
+		executor = new Executor(testName, executionSpecifications);
 		try {
 			log.info("ProductFilterTest.testProductFilter");
 			executor.log(Status.INFO, executor.getPageTitle());

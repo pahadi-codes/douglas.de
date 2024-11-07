@@ -1,23 +1,29 @@
 package de.douglas;
-import com.aventstack.extentreports.ExtentReports;
+
 import de.douglas.enums.Browser;
 import de.douglas.enums.Channel;
+import de.douglas.util.Constants;
+import de.douglas.util.ExcelFileReader;
 import de.douglas.util.ExtentManager;
 import lombok.extern.slf4j.Slf4j;
-import org.testng.annotations.AfterSuite;
 import org.testng.annotations.AfterTest;
-import org.testng.annotations.BeforeSuite;
+import org.testng.annotations.BeforeTest;
+import org.testng.annotations.DataProvider;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
 import java.util.Map;
 import java.util.Properties;
 import java.util.TreeMap;
+
 @Slf4j
 public class TestBase {
+	public String testName = "";
 	public Executor executor;
-	Properties properties = new Properties();
 	public Map<String, Object> executionSpecifications = new TreeMap<>();
+	Properties properties = new Properties();
+
 	public void initialize() {
 		log.info("Initializing Execution");
 		try {
@@ -39,45 +45,22 @@ public class TestBase {
 		executionSpecifications.put("url", System.getProperty("url", properties.getProperty("url")));
 		log.info("Execution Specifications: {}", executionSpecifications);
 	}
-	//Loading Initial Configs
-	@BeforeSuite
-	public void beforeSuite() {
-		log.info("Before Suite");
-		initialize();
+
+	@BeforeTest
+	public void beforeTest() {
+		testName = this.getClass().getSimpleName();
 	}
-	@AfterSuite
-	public void afterSuite() {
-		log.info("After Suite");
+
+	@DataProvider
+	public Object[] getData() {
+		ExcelFileReader excelFileReader = new ExcelFileReader(Executor.class.getResource("/" + Constants.TEST_DATA_EXCEL_FILE_NAME));
+		Object[] data = new Object[1];
+		data[0] = excelFileReader;
+		return data;
 	}
-//	@BeforeTest
-//	public void beforeTest() {
-//		log.info("Before Test");
-//	}
-//
+
 	@AfterTest
 	public void afterTest() {
-		log.info("After Test");
 		ExtentManager.getInstance().flush();
 	}
-//
-//	@BeforeClass
-//	public void beforeClass() {
-//		log.info("Before Class");
-//	}
-//
-//	@AfterClass
-//	public void afterClass() {
-//		log.info("After Class");
-//	}
-//
-//	@BeforeGroups
-//	public void beforeGroups() {
-//		log.info("Before Groups");
-//		initialize();
-//	}
-//
-//	@AfterGroups
-//	public void afterGroups() {
-//		log.info("After Groups");
-//	}
 }
