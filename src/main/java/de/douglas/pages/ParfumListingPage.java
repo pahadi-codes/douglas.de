@@ -36,7 +36,7 @@ public class ParfumListingPage {
 			try {
 				executor.click(Objects.DROPDOWN_FURWEN.by);
 				executor.click(StringUtility.getUpdatedLocatedBy(Objects.CHECKBOX_SEARCH_DROPDOWN_FURWEN.by.toString().replace("SEARCH_ITEM", input)), AlternativeClickType.JAVASCRIPT);
-				executor.log(Status.PASS, "Filters Applied Successfully");
+				executor.log(Status.INFO, "Filters Applied Successfully");
 			} catch (Exception exception) {
 				executor.log(Status.FAIL, "Error Applying Filters");
 				throw exception;
@@ -51,7 +51,7 @@ public class ParfumListingPage {
 				executor.click(Objects.DROPDOWN_GESCHENKFUR.by);
 				executor.sendKeys(Objects.TEXTBOX_SEARCH_DROPDOWN_GESCHENKFUR.by, input);
 				executor.click(StringUtility.getUpdatedLocatedBy(Objects.CHECKBOX_SEARCH_DROPDOWN_GESCHENKFUR.by.toString().replace("SEARCH_ITEM", input)), AlternativeClickType.JAVASCRIPT);
-				executor.log(Status.PASS, "Filters Applied Successfully");
+				executor.log(Status.INFO, "Filters Applied Successfully");
 			} catch (Exception exception) {
 				executor.log(Status.FAIL, "Error Applying Filters");
 				throw exception;
@@ -66,7 +66,7 @@ public class ParfumListingPage {
 				executor.click(Objects.DROPDOWN_MARKE.by);
 				executor.sendKeys(Objects.TEXTBOX_SEARCH_DROPDOWN_MARKE.by, input);
 				executor.click(StringUtility.getUpdatedLocatedBy(Objects.CHECKBOX_SEARCH_DROPDOWN_MARKE.by.toString().replace("SEARCH_ITEM", input)), AlternativeClickType.JAVASCRIPT);
-				executor.log(Status.PASS, "Filters Applied Successfully");
+				executor.log(Status.INFO, "Filters Applied Successfully");
 			} catch (Exception exception) {
 				executor.log(Status.FAIL, "Error Applying Filters");
 				throw exception;
@@ -81,7 +81,7 @@ public class ParfumListingPage {
 				executor.click(Objects.DROPDOWN_PRODUKTART.by);
 				executor.sendKeys(Objects.TEXTBOX_SEARCH_DROPDOWN_PRODUKTART.by, input);
 				executor.click(StringUtility.getUpdatedLocatedBy(Objects.CHECKBOX_SEARCH_DROPDOWN_PRODUKTART.by.toString().replace("SEARCH_ITEM", input)), AlternativeClickType.JAVASCRIPT);
-				executor.log(Status.PASS, "Filters Applied Successfully");
+				executor.log(Status.INFO, "Filters Applied Successfully");
 			} catch (Exception exception) {
 				executor.log(Status.FAIL, "Error Applying Filters");
 				throw exception;
@@ -102,6 +102,7 @@ public class ParfumListingPage {
 		} else {
 			throw new IllegalArgumentException("Invalid Search Criteria Specified");
 		}
+		executor.log(Status.INFO, "Total Criteria Matching Products: " + products.size());
 		for (WebElement product : products) {
 			executor.log(Status.INFO, "Product: <br/>" + product.getText());
 		}
@@ -131,9 +132,9 @@ public class ParfumListingPage {
 		DROPDOWN_FURWEN(By.xpath("//div[@data-testid='gender']")),
 		CHECKBOX_SEARCH_DROPDOWN_FURWEN(By.xpath("//div[@data-testid='gender']/following-sibling::div[@class='facet__menu']//a/div/div[text()='SEARCH_ITEM']/parent::div/preceding-sibling::span//input[@type='checkbox']")),
 		LOADER(By.cssSelector(".page-loader-wrapper")),
-		BOX_ALL_NEW_PRODUCTS(By.xpath("//div[contains(@class,'product-tile')]//*[contains(@class,'eyecatcher--new')]/parent::div/parent::div/following-sibling::div[contains(@class,'details-container')]")),
-		BOX_ALL_SALE_PRODUCTS(By.xpath("//div[contains(@class,'product-tile')]//*[contains(@class,'eyecatcher--discount')]/parent::div/parent::div/following-sibling::div[contains(@class,'details-container')]")),
-		BOX_ALL_LIMITED_EDITION_PRODUCTS(By.xpath("//div[contains(@class,'product-tile')]//following-sibling::div[contains(@class,'details-container')]//div[contains(@class,'name')][contains(.,'Edition')]")),
+		BOX_ALL_NEW_PRODUCTS(By.xpath("//div[contains(@class,'product-tile')]//*[contains(@class,'eyecatcher--new')]/parent::div/parent::div/following-sibling::div[contains(@class,'details-container')]//div[contains(@class,'info-wrapper')]")),
+		BOX_ALL_SALE_PRODUCTS(By.xpath("//div[contains(@class,'product-tile')]//*[contains(@class,'eyecatcher--discount')]/parent::div/parent::div/following-sibling::div[contains(@class,'details-container')]//div[contains(@class,'info-wrapper')]")),
+		BOX_ALL_LIMITED_EDITION_PRODUCTS(By.xpath("//div[contains(@class,'product-tile')]//following-sibling::div[contains(@class,'details-container')]//div[contains(@class,'name')][contains(.,'Edition')]/parent::div/parent::div")),
 		;
 		public final By by;
 
