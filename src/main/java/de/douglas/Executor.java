@@ -111,6 +111,14 @@ public class Executor {
 		return driver.getTitle();
 	}
 
+	public boolean isDisappeared(By by) {
+		return wait.until(ExpectedConditions.invisibilityOfElementLocated(by));
+	}
+
+	public List<WebElement> findElements(By by) {
+		return wait.until(ExpectedConditions.presenceOfAllElementsLocatedBy(by));
+	}
+
 	private WebElement findElement(By by) {
 		return highlight(wait.until(ExpectedConditions.presenceOfElementLocated(by)));
 	}

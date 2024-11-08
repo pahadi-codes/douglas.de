@@ -6,7 +6,10 @@ import de.douglas.enums.AlternativeClickType;
 import de.douglas.util.StringUtility;
 import lombok.extern.slf4j.Slf4j;
 import org.openqa.selenium.By;
+import org.openqa.selenium.WebElement;
 import org.testng.Assert;
+
+import java.util.List;
 
 @Slf4j
 public class ParfumListingPage {
@@ -88,7 +91,25 @@ public class ParfumListingPage {
 	}
 
 	public ParfumListingPage getCriteriaSpecificProducts(String input) {
-		executor.log(Status.INFO, "Getting Criteria Specific");
+		executor.log(Status.INFO, "Getting Criteria Specific Products");
+		List<WebElement> products;
+		if (input.equalsIgnoreCase("Neu")) {
+			products = executor.findElements(Objects.BOX_ALL_NEW_PRODUCTS.by);
+		} else if (input.equalsIgnoreCase("Sale")) {
+			products = executor.findElements(Objects.BOX_ALL_SALE_PRODUCTS.by);
+		} else if (input.equalsIgnoreCase("Limitiert")) {
+			products = executor.findElements(Objects.BOX_ALL_LIMITED_EDITION_PRODUCTS.by);
+		} else {
+			throw new IllegalArgumentException("Invalid Search Criteria Specified");
+		}
+		for (WebElement product : products) {
+			executor.log(Status.INFO, "Product: <br/>" + product.getText());
+		}
+		return this;
+	}
+
+	public ParfumListingPage waitForLoaderToDisappear() {
+		executor.isDisappeared(Objects.LOADER.by);
 		return this;
 	}
 
@@ -109,7 +130,10 @@ public class ParfumListingPage {
 		BUTTON_SAVE_CHANGES_DROPDOWN_PRODUKTART(By.xpath("//div[@data-testid='classificationClassName']/following-sibling::div[@class='facet__menu']/div/button")),
 		DROPDOWN_FURWEN(By.xpath("//div[@data-testid='gender']")),
 		CHECKBOX_SEARCH_DROPDOWN_FURWEN(By.xpath("//div[@data-testid='gender']/following-sibling::div[@class='facet__menu']//a/div/div[text()='SEARCH_ITEM']/parent::div/preceding-sibling::span//input[@type='checkbox']")),
-
+		LOADER(By.cssSelector(".page-loader-wrapper")),
+		BOX_ALL_NEW_PRODUCTS(By.xpath("//div[contains(@class,'product-tile')]//*[contains(@class,'eyecatcher--new')]/parent::div/parent::div/following-sibling::div[contains(@class,'details-container')]")),
+		BOX_ALL_SALE_PRODUCTS(By.xpath("//div[contains(@class,'product-tile')]//*[contains(@class,'eyecatcher--discount')]/parent::div/parent::div/following-sibling::div[contains(@class,'details-container')]")),
+		BOX_ALL_LIMITED_EDITION_PRODUCTS(By.xpath("//div[contains(@class,'product-tile')]//following-sibling::div[contains(@class,'details-container')]//div[contains(@class,'name')][contains(.,'Edition')]")),
 		;
 		public final By by;
 

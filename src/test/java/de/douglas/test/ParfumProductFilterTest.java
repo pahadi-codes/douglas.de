@@ -11,15 +11,12 @@ import java.util.Map;
 
 @Slf4j
 public class ParfumProductFilterTest extends TestBase {
-	LandingPage landingPage;
-
 	@Test(dataProvider = "getData")
 	public void testProductFilter(Map<String, String> data) {
 		executor = new Executor(testName, executionSpecifications);
 		executor.log(Status.INFO, "Test Data: " + data);
 		try {
-			landingPage = new LandingPage(executor);
-			landingPage
+			new LandingPage(executor)
 					.verifyAndAcceptCookiesConsentIfAvailable()
 					.openParfumPage()
 					.verifyParfumPage()
@@ -27,8 +24,10 @@ public class ParfumProductFilterTest extends TestBase {
 					.applyProduktartFilter(data.get("Produktart"))
 					.applyGeschenkFurFilter(data.get("Geschenk für"))
 					.applyFurWenFilter(data.get("Für Wen"))
+					.waitForLoaderToDisappear()
 					.getCriteriaSpecificProducts(data.get("Criteria"))
 			;
+			executor.log(Status.PASS, "Test Execution Completed");
 		} catch (Throwable exception) {
 			executor.logFailureException(exception);
 			throw exception;
