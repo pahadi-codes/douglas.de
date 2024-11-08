@@ -18,7 +18,7 @@ public class Constants {
 	public static final String HTML_LOG_IMAGE_BASE64 = "IMAGE_BASE64";
 	public static final String EXTENT_LOG_SAMPLE =
 					"<div class='d-flex align-items-center'>\n" +
-					"    <div class='container pl-0'>\n" +
+					"    <div class='container ml-0 pl-0'>\n" +
 					"        <div class='fw-lighter fs-3'>" + HTML_LOG_HEADER + "</div>\n" +
 					"        <code>" + HTML_LOG_CODE + "</code>\n" +
 					"    </div>\n" +

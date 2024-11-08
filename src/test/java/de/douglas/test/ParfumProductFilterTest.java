@@ -1,4 +1,5 @@
 package de.douglas.test;
+
 import com.aventstack.extentreports.Status;
 import de.douglas.Executor;
 import de.douglas.TestBase;
@@ -6,17 +7,28 @@ import de.douglas.pages.LandingPage;
 import lombok.extern.slf4j.Slf4j;
 import org.testng.annotations.Test;
 
+import java.util.Map;
+
 @Slf4j
 public class ParfumProductFilterTest extends TestBase {
 	LandingPage landingPage;
-	@Test
-	public void testProductFilter() {
+
+	@Test(dataProvider = "getData")
+	public void testProductFilter(Map<String, String> data) {
 		executor = new Executor(testName, executionSpecifications);
+		executor.log(Status.INFO, "Test Data: " + data);
 		try {
-			log.info("ProductFilterTest.testProductFilter");
-			executor.log(Status.INFO, executor.getPageTitle());
 			landingPage = new LandingPage(executor);
-			landingPage.acceptCookiesConsentIfAvailable().openParfum();
+			landingPage
+					.verifyAndAcceptCookiesConsentIfAvailable()
+					.openParfumPage()
+					.verifyParfumPage()
+					.applyMarkeFilter(data.get("Marke"))
+					.applyProduktartFilter(data.get("Produktart"))
+					.applyGeschenkFurFilter(data.get("Geschenk für"))
+					.applyFurWenFilter(data.get("Für Wen"))
+					.getCriteriaSpecificProducts(data.get("Criteria"))
+			;
 		} catch (Throwable exception) {
 			executor.logFailureException(exception);
 			throw exception;

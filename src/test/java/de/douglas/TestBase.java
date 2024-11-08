@@ -7,12 +7,13 @@ import de.douglas.util.ExcelFileReader;
 import de.douglas.util.ExtentManager;
 import lombok.extern.slf4j.Slf4j;
 import org.testng.annotations.AfterTest;
+import org.testng.annotations.BeforeSuite;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.DataProvider;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URL;
+import java.util.Arrays;
 import java.util.Map;
 import java.util.Properties;
 import java.util.TreeMap;
@@ -53,10 +54,24 @@ public class TestBase {
 
 	@DataProvider
 	public Object[] getData() {
-		ExcelFileReader excelFileReader = new ExcelFileReader(Executor.class.getResource("/" + Constants.TEST_DATA_EXCEL_FILE_NAME));
-		Object[] data = new Object[1];
-		data[0] = excelFileReader;
+		ExcelFileReader excel = new ExcelFileReader(Executor.class.getResource("/" + Constants.TEST_DATA_EXCEL_FILE_NAME));
+		int rowCount = excel.getRowCount(testName) - 1;
+		Object[] data = new Object[rowCount];
+		for (int rowIndex = 0; rowIndex < rowCount; rowIndex++) {
+			int rowNum = rowIndex + 2;
+			Map<String, String> rowData = new TreeMap<>();
+			for (String colName : excel.getCellsFromRow(testName, 1).values()) {
+				rowData.put(colName, excel.getCellValue(testName, rowNum, colName));
+			}
+			data[rowIndex] = rowData;
+		}
+		System.out.println(Arrays.toString(data));
 		return data;
+	}
+
+	@BeforeSuite
+	public void beforeSuite() {
+		initialize();
 	}
 
 	@AfterTest

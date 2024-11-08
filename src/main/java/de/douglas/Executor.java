@@ -4,6 +4,7 @@ import com.aventstack.extentreports.ExtentTest;
 import com.aventstack.extentreports.Status;
 import com.aventstack.extentreports.util.Assert;
 import de.douglas.enums.Action;
+import de.douglas.enums.AlternativeClickType;
 import de.douglas.enums.Browser;
 import de.douglas.enums.Channel;
 import de.douglas.util.ExtentManager;
@@ -22,9 +23,7 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.Map;
-import java.util.Objects;
-import java.util.TreeMap;
+import java.util.*;
 
 import static de.douglas.util.Constants.*;
 
@@ -43,51 +42,10 @@ public class Executor {
 		wait = new WebDriverWait(driver, DEFAULT_EXPLICIT_WAIT_TIMEOUT);
 	}
 
-	public void logConsole(Status status, String message) {
-		switch (status) {
-			case WARNING:
-				log.warn(message);
-				break;
-			case FAIL:
-				log.error(message);
-				break;
-			default:
-				log.info(message);
-				break;
-		}
-	}
-
-	public void log(Status status, String message) {
-		logConsole(status, message);
-		test.log(status, getExtentMessage(getReportMessageMap(status, message)));
-	}
-
-	public void log(Status status, Map<String, String> messageMap) {
-		logConsole(status, messageMap.toString());
-		test.log(status, getExtentMessage(messageMap));
-	}
-
-	public void logWithScreenshot(Status status, String message) {
-		logConsole(status, message);
-		test.log(status, message);
-	}
-
-	public void logFailureException(Throwable message) {
-		logConsole(Status.FAIL, message.getMessage());
-		test.log(Status.FAIL, message);
-	}
-
-	private String getExtentMessage(Map<String, String> messageMap) {
-		String header = messageMap.get(ACTION_KEY);
-		if (messageMap.containsKey(TEXT_KEY)) {
-			header = ": " + messageMap.get(TEXT_KEY);
-		}
-		return EXTENT_LOG_SAMPLE.replace(HTML_LOG_IMAGE_BASE64, getScreenshotAsBase64()).replace(HTML_LOG_CODE, messageMap.get(MESSAGE_KEY)).replace(HTML_LOG_HEADER, header.toUpperCase());
-	}
-
 	public void initializeDriver() {
 		log.info("Initializing driver");
 		Capabilities capabilities = null;
+		log.debug("Execution Specifications: {}", executionSpecifications);
 		switch ((Browser) executionSpecifications.get("browser")) {
 			case CHROME:
 				capabilities = new ChromeOptions();
@@ -159,21 +117,34 @@ public class Executor {
 
 	private WebElement findElementInsideShadowRoot(By shadowRootBy, By elementBy) {
 		WebElement shadowRoot = findElement(shadowRootBy);
-		System.out.println("Shadow: " + shadowRoot.getSize());
+		log.info("Shadow Size: {}", shadowRoot.getSize());
 		SearchContext context = shadowRoot.getShadowRoot();
 		WebElement element = context.findElement(elementBy);
 		return element;
 	}
 
 	private WebElement highlight(WebElement element) {
-		driver.executeScript("arguments[0].scrollIntoView()", element);
+//		driver.executeScript("arguments[0].scrollIntoView()", element);
 		driver.executeScript("arguments[0].setAttribute('style', 'background: yellow; border: 2px solid red;')", element);
 		return element;
 	}
 
-	public void click(By by) {
+	public void click(By by, AlternativeClickType... clickType) {
 		try {
-			findElement(by).click();
+			if (clickType.length == 0) {
+				findElement(by).click();
+			} else if (clickType.length == 1) {
+				switch (clickType[0]) {
+					case ACTIONS:
+						new Actions(driver).moveToElement(findElement(by)).click().build().perform();
+						break;
+					case JAVASCRIPT:
+						driver.executeScript("arguments[0].click()", findElement(by));
+						break;
+				}
+			} else {
+				throw new IllegalArgumentException("More than one Click Type Passed: " + Arrays.toString(clickType));
+			}
 			log(Status.PASS, getReportMessageMap(Action.CLICK, by));
 		} catch (Exception exception) {
 			log(Status.FAIL, exception.getMessage());
@@ -181,31 +152,10 @@ public class Executor {
 		}
 	}
 
-	public void click(By shadowRootBy, By by) {
+	public void click(By shadowRootLocatedBy, By elementLocatedBy) {
 		try {
-			findElementInsideShadowRoot(shadowRootBy, by).click();
-			log(Status.PASS, getReportMessageMap(Action.CLICK, by));
-		} catch (Exception exception) {
-			log(Status.FAIL, exception.getMessage());
-			throw exception;
-		}
-	}
-
-	public void clickUsingActions(By by) {
-		Actions actions = new Actions(driver);
-		try {
-			actions.moveToElement(findElement(by)).click().build().perform();
-			log(Status.PASS, getReportMessageMap(Action.CLICK, by));
-		} catch (Exception exception) {
-			log(Status.FAIL, exception.getMessage());
-			throw exception;
-		}
-	}
-
-	public void clickUsingJavascript(By by) {
-		try {
-			driver.executeScript("arguments[0].click()", findElement(by));
-			log(Status.PASS, getReportMessageMap(Action.CLICK, by));
+			findElementInsideShadowRoot(shadowRootLocatedBy, elementLocatedBy).click();
+			log(Status.PASS, getReportMessageMap(Action.CLICK, elementLocatedBy));
 		} catch (Exception exception) {
 			log(Status.FAIL, exception.getMessage());
 			throw exception;
@@ -220,6 +170,43 @@ public class Executor {
 			log(Status.FAIL, exception.getMessage());
 			throw exception;
 		}
+	}
+
+	public void logConsole(Status status, String message) {
+		switch (status) {
+			case WARNING:
+				log.warn(message);
+				break;
+			case FAIL:
+				log.error(message);
+				break;
+			default:
+				log.info(message);
+				break;
+		}
+	}
+
+	public void log(Status status, String message) {
+		logConsole(status, message);
+		test.log(status, getExtentMessage(getReportMessageMap(status, message)));
+	}
+
+	public void log(Status status, Map<String, String> messageMap) {
+		logConsole(status, messageMap.toString());
+		test.log(status, getExtentMessage(messageMap));
+	}
+
+	public void logFailureException(Throwable message) {
+		logConsole(Status.FAIL, message.getMessage());
+		test.log(Status.FAIL, message);
+	}
+
+	private String getExtentMessage(Map<String, String> messageMap) {
+		String header = messageMap.get(ACTION_KEY);
+		if (messageMap.containsKey(TEXT_KEY)) {
+			header = header + ": " + messageMap.get(TEXT_KEY);
+		}
+		return EXTENT_LOG_SAMPLE.replace(HTML_LOG_IMAGE_BASE64, getScreenshotAsBase64()).replace(HTML_LOG_CODE, messageMap.get(MESSAGE_KEY)).replace(HTML_LOG_HEADER, header.toUpperCase());
 	}
 
 	private Map<String, String> getReportMessageMap(Action action, By by, CharSequence... keysToSend) {
@@ -257,4 +244,24 @@ public class Executor {
 		}
 		return base64Image;
 	}
+
+	public boolean isElementPresent(By by) {
+		try {
+			return findElement(by).isDisplayed();
+		} catch (Exception exception) {
+			log(Status.FAIL, exception.getMessage());
+			throw exception;
+		}
+	}
+
+	public String getText(By by) {
+		try {
+			return findElement(by).getText();
+		} catch (Exception exception) {
+			log(Status.FAIL, exception.getMessage());
+			throw exception;
+		}
+	}
+
+
 }

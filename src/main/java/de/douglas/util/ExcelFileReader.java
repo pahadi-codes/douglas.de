@@ -60,6 +60,9 @@ public class ExcelFileReader {
 	public String getCellValue(String sheetName, int rowNum, int colIndex) {
 		try {
 			Cell cell = workbook.getSheet(sheetName).getRow(rowNum - 1).getCell(colIndex);
+			if (cell == null) {
+				return "";
+			}
 			switch (cell.getCellType()) {
 				case STRING:
 					return cell.getStringCellValue();
@@ -80,9 +83,10 @@ public class ExcelFileReader {
 
 	public String getCellValue(String sheetName, int rowNum, String colName) {
 		int colIndex = -1;
-		for (int activeCellIndex : getCellsFromRow(sheetName, 1).keySet()) {
-			if (colName.equals(getCellValue(sheetName, rowNum, activeCellIndex))) {
-				colIndex = activeCellIndex;
+		Map<Integer, String> cells = getCellsFromRow(sheetName, 1);
+		for (int activeColIndex : cells.keySet()) {
+			if (cells.get(activeColIndex).equals(colName)) {
+				colIndex = activeColIndex;
 			}
 		}
 		return getCellValue(sheetName, rowNum, colIndex);
@@ -90,7 +94,7 @@ public class ExcelFileReader {
 
 	public Map<Integer, String> getCellsFromRow(String sheetName, int rowNum) {
 		Map<Integer, String> cells = new TreeMap<>();
-		for (int index = 0; index < getRowCount(sheetName); index++) {
+		for (int index = 0; index < getColCount(sheetName); index++) {
 			cells.put(index, getCellValue(sheetName, rowNum, index));
 		}
 		return cells;
